@@ -1,6 +1,9 @@
 {
   "expo": {
-    "name": "MyCalculator",
+    "experiments": {
+      "bridgeless": false
+    },
+    "name": "NotesApp",
     "slug": "test-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -29,6 +32,10 @@
       "eas": {
         "projectId": "454dba08-ead4-4a5e-bf22-579584428e29"
       }
-    }
+    },
+    "plugins": [
+      "expo-font",
+      "expo-sqlite"
+    ]
   }
 }
