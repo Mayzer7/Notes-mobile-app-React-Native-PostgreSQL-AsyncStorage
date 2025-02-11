@@ -1,25 +1,20 @@
 import React, { useState, useMemo } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  StatusBar,
-  TextInput,
-  ScrollView,
-  TouchableOpacity
-} from 'react-native';
+import {StyleSheet, Text, View, StatusBar, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useFonts } from 'expo-font';
 import { Roboto_700Bold } from '@expo-google-fonts/roboto';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
-export default function Notion() {
+export default function Notion({ navigation, route }) {
   let [fontsLoaded] = useFonts({
     Roboto_700Bold,
   });
 
-  const [notes, setNotes] = useState({});
+  // Получаем email из переданных параметров
+  const { email } = route.params;
+
   const [currentDate, setCurrentDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [notes, setNotes] = useState({ navigation });
 
   const formattedDate = useMemo(() => {
     let date = format(currentDate, 'MMM yyyy', { locale: ru });
@@ -58,6 +53,10 @@ export default function Notion() {
     setCurrentDate(prevDate => addDays(prevDate, 7));
   };
 
+  const handleProfile = () => {
+    navigation.navigate('Profile', { email });
+  };
+
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -72,6 +71,9 @@ export default function Notion() {
       <View style={styles.header}>
         <Text style={styles.dateText}>{formattedDate}</Text>
         <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.buttonIcon} onPress={handleProfile}>
+          <Image source={require('../assets/images/user-icon.png')} style={styles.userIcon} />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handlePrevWeek}>
             <Text style={styles.buttonText}>{'<'}</Text>
           </TouchableOpacity>
@@ -153,6 +155,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 3,
+  },
+  buttonIcon: {
+    marginTop: 40,
+    right: 10,
+    width: 50,
+    height: 50,
+    borderRadius: 30,
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 3,
+  },
+  userIcon: {
+    width: 30,  // Размер логотипа (можно подкорректировать)
+    height: 30,
+    marginRight: 1,
   },
   buttonText: {
     color: 'white',

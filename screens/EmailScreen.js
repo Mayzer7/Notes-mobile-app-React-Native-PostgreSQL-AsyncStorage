@@ -64,7 +64,7 @@ export default function EmailScreen({ navigation }) {
       try {
         const result = await loginUser(email, password);
         Alert.alert(result.message); // Выводим сообщение об успешном входе
-        navigation.navigate('Notion'); // Переходим на другой экран
+        navigation.navigate('Notion', {email: email}); // Переходим на другой экран
       } catch (error) {
         Alert.alert(error.message); // Выводим сообщение об ошибке
       }
