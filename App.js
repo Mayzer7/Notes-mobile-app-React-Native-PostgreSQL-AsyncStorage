@@ -6,6 +6,9 @@ import AuthScreen from './screens/AuthScreen'; // экран аутентифи�
 import EmailScreen from './screens/EmailScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import EditNameScreen from './screens/EditNameScreen';
+import EditEmailScreen from './screens/EditEmailScreen';
+import EditPasswordScreen from './screens/EditPasswordScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +28,9 @@ export default function App() {
         <Stack.Screen name="Email" component={EmailScreen} />
         <Stack.Screen name="Registration" component={RegistrationScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="EditName" component={EditNameScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="EditEmail" component={EditEmailScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="EditPassword" component={EditPasswordScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

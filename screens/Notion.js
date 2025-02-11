@@ -11,7 +11,7 @@ export default function Notion({ navigation, route }) {
   });
 
   // Получаем email из переданных параметров
-  const { email } = route.params;
+  const { name } = route.params;
 
   const [currentDate, setCurrentDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [notes, setNotes] = useState({ navigation });
@@ -54,7 +54,7 @@ export default function Notion({ navigation, route }) {
   };
 
   const handleProfile = () => {
-    navigation.navigate('Profile', { email });
+    navigation.navigate('Profile', { name });
   };
 
   if (!fontsLoaded) {
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 30,
-    backgroundColor: 'red',
+    backgroundColor: '#E6D9F3',
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 3,

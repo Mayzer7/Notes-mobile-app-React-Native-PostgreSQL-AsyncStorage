@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { loginUser } from '../utils/api';
 
 export default function EmailScreen({ navigation }) {
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
 
   const handleRegistration = () => {
@@ -60,11 +60,11 @@ export default function EmailScreen({ navigation }) {
   }, [navigation]);
 
   const handleLogin = async () => {
-    if (email && password) {
+    if (name && password) {
       try {
-        const result = await loginUser(email, password);
-        Alert.alert(result.message); // Выводим сообщение об успешном входе
-        navigation.navigate('Notion', {email: email}); // Переходим на другой экран
+        const result = await loginUser(name, password);
+        // Alert.alert(result.message); // Выводим сообщение об успешном входе
+        navigation.navigate('Notion', {name: name}); // Переходим на другой экран
       } catch (error) {
         Alert.alert(error.message); // Выводим сообщение об ошибке
       }
@@ -79,10 +79,9 @@ export default function EmailScreen({ navigation }) {
       
       <TextInput
         style={styles.input}
-        placeholder="Введите Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+        placeholder="Введите Логин"
+        value={name}
+        onChangeText={setName}
         placeholderTextColor="#000"
       />
       
