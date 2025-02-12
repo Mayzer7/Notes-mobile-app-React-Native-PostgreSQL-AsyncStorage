@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput , Image, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
 import { useFonts } from 'expo-font';
+import { updatePassword } from '../utils/api';
 
 export default function EditPasswordScreen({ navigation, route }) {
   const [fontsLoaded] = useFonts({
@@ -17,9 +18,24 @@ export default function EditPasswordScreen({ navigation, route }) {
 
   // Получаем email из параметров навигации
   const { name } = route.params;
+  const [newPassword, setNewPassword] = useState('');
 
   const handlePreviousPage = () => {
     navigation.navigate('Profile', { name });
+  };
+
+  const handleUpdatePassword = async () => {
+    if (newPassword.length < 8) {
+      Alert.alert('Ошибка', 'Пароль должен содержать минимум 8 символов');
+      return;
+    }
+    try {
+      await updatePassword(name, newPassword);
+      Alert.alert('Успех', 'Пароль успешно обновлен');
+      navigation.navigate('Profile', { name });
+    } catch (error) {
+      Alert.alert('Ошибка', error.message);
+    }
   };
 
   return (
@@ -40,9 +56,12 @@ export default function EditPasswordScreen({ navigation, route }) {
         style={styles.input}
         placeholder={'Пароль'}
         placeholderTextColor="#000"
+        secureTextEntry
+        value={newPassword}
+        onChangeText={setNewPassword}
         />
               
-        <TouchableOpacity style={styles.buttonConfirm}>
+        <TouchableOpacity style={styles.buttonConfirm} onPress={handleUpdatePassword}>
             <Text style={styles.buttonTextConfirm}>Изменить</Text>
         </TouchableOpacity>
       </View>

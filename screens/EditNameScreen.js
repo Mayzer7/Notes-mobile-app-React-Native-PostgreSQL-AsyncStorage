@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput , Image, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
 import { useFonts } from 'expo-font';
+import { updateUserName } from '../utils/api'
 
 export default function EditNameScreen({ navigation, route }) {
   const [fontsLoaded] = useFonts({
@@ -17,9 +18,25 @@ export default function EditNameScreen({ navigation, route }) {
 
   // Получаем email из параметров навигации
   const { name } = route.params;
+  const [newName, setNewName] = useState('');
 
   const handlePreviousPage = () => {
     navigation.navigate('Profile', { name });
+  };
+
+  const handleChangeName = async () => {
+    if (newName.length < 3) {
+      Alert.alert('Ошибка', 'Имя должно содержать минимум 3 символа');
+      return;
+    }
+
+    try {
+      const response = await updateUserName(name, newName);
+      Alert.alert('Успех', 'Имя успешно обновлено');
+      navigation.navigate('Profile', { name: newName });
+    } catch (error) {
+      Alert.alert('Ошибка', error.message);
+    }
   };
 
   return (
@@ -40,9 +57,11 @@ export default function EditNameScreen({ navigation, route }) {
         style={styles.input}
         placeholder={name}
         placeholderTextColor="#000"
+        value={newName}
+        onChangeText={setNewName}
         />
               
-        <TouchableOpacity style={styles.buttonConfirm}>
+        <TouchableOpacity style={styles.buttonConfirm} onPress={handleChangeName}>
             <Text style={styles.buttonTextConfirm}>Изменить</Text>
         </TouchableOpacity>
       </View>

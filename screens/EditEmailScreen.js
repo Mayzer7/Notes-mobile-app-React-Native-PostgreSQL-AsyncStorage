@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput , Image, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
 import { useFonts } from 'expo-font';
+import { updateEmail } from '../utils/api';
 
 export default function EditEmailScreen({ navigation, route }) {
   const [fontsLoaded] = useFonts({
@@ -17,9 +18,25 @@ export default function EditEmailScreen({ navigation, route }) {
 
   // Получаем email из параметров навигации
   const { name, email } = route.params;
+  const [newEmail, setNewEmail] = useState(email)
 
   const handlePreviousPage = () => {
     navigation.navigate('Profile', { name, email});
+  };
+
+  const handleUpdateEmail = async () => {
+    if (!newEmail.includes('@') || !newEmail.includes('.')) {
+      Alert.alert('Ошибка', 'Введите корректный email');
+      return;
+    }
+
+    try {
+      await updateEmail(name, newEmail);
+      Alert.alert('Успешно', 'Email обновлен');
+      navigation.navigate('Profile', { name, email: newEmail });
+    } catch (error) {
+      Alert.alert('Ошибка', error.message);
+    }
   };
 
   return (
@@ -38,11 +55,14 @@ export default function EditEmailScreen({ navigation, route }) {
         <Text style={styles.text}>Введите новый email</Text>
         <TextInput
         style={styles.input}
+        value={newEmail}
+        onChangeText={setNewEmail}
         placeholder={email}
         placeholderTextColor="#000"
+        keyboardType="email-address"
         />
               
-        <TouchableOpacity style={styles.buttonConfirm}>
+        <TouchableOpacity style={styles.buttonConfirm} onPress={handleUpdateEmail}>
             <Text style={styles.buttonTextConfirm}>Изменить</Text>
         </TouchableOpacity>
       </View>
