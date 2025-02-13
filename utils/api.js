@@ -94,3 +94,60 @@ export const updatePassword = async (name, newPassword) => {
   return await response.json();
 };
 
+
+
+
+
+// Получение id пользователя по имени
+export const getUserIdByName = async (name) => {
+  if (!name) {
+    throw new Error('Имя не передано');
+  }
+
+  const response = await fetch(`http://192.168.0.104:3000/get-id-by-name?name=${name}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const textResponse = await response.text(); // Получаем ответ как текст
+  console.log("Ответ от сервера:", textResponse); // Логируем ответ сервера
+
+  try {
+    const data = JSON.parse(textResponse); // Парсим ответ вручную
+
+    if (data.error) {
+      throw new Error(data.error); // Если ошибка в ответе, выбрасываем её
+    }
+
+    console.log("ID пользователя:", data.id); // Логируем ID
+    return data; // Возвращаем данные, если всё ок
+  } catch (error) {
+    console.error('Ошибка:', error.message); // Логируем ошибку
+    throw new Error(error.message); // Генерируем ошибку для обработки на клиенте
+  }
+};
+
+
+
+
+
+
+// Добавление заметки
+export const addNote = async (id, content, date) => {
+  const response = await fetch('http://192.168.0.104:3000/add-note', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, content, date }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Ошибка при добавлении заметки');
+  }
+
+  return await response.json();
+};

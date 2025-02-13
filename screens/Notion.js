@@ -1,20 +1,23 @@
 import React, { useState, useMemo } from 'react';
-import {StyleSheet, Text, View, StatusBar, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, StatusBar, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useFonts } from 'expo-font';
 import { Roboto_700Bold } from '@expo-google-fonts/roboto';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { getUserIdByName, addNote } from '../utils/api';
 
 export default function Notion({ navigation, route }) {
   let [fontsLoaded] = useFonts({
     Roboto_700Bold,
   });
 
-  // Получаем email из переданных параметров
   const { name } = route.params;
+  const nameUserId = name;
 
   const [currentDate, setCurrentDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const [notes, setNotes] = useState({ navigation });
+  
+  // Состояние для хранения заметок для каждого дня
+  const [notes, setNotes] = useState({});
 
   const formattedDate = useMemo(() => {
     let date = format(currentDate, 'MMM yyyy', { locale: ru });
@@ -26,24 +29,22 @@ export default function Notion({ navigation, route }) {
       const date = addDays(currentDate, index);
       return {
         formatted: format(date, 'd MMM', { locale: ru }),
-        weekday: format(date, 'E', { locale: ru }).slice(0, 2).replace(/^./, str => str.toUpperCase())
+        weekday: format(date, 'E', { locale: ru }).slice(0, 2).replace(/^./, str => str.toUpperCase()),
+        date: format(date, 'yyyy-MM-dd'),  // уникальный ключ для каждого дня
       };
     });
   }, [currentDate]);
 
-  const handleNoteChange = (text, date, index) => {
-    setNotes(prevNotes => {
-      const updatedNotes = { ...prevNotes };
-      if (!updatedNotes[date]) {
-        updatedNotes[date] = [''];
-      }
-      updatedNotes[date][index] = text;
-      if (text.trim() !== '' && index === updatedNotes[date].length - 1) {
-        updatedNotes[date].push('');
-      }
-      return updatedNotes;
-    });
+  const fetchUserId = async (nameUserId) => {
+    try {
+      const data = await getUserIdByName(name);
+      console.log(`ID пользователя: ${data.id}`);
+    } catch (error) {
+      console.error('Ошибка:', error.message);
+    }
   };
+
+  fetchUserId();
 
   const handlePrevWeek = () => {
     setCurrentDate(prevDate => addDays(prevDate, -7));
@@ -55,6 +56,24 @@ export default function Notion({ navigation, route }) {
 
   const handleProfile = () => {
     navigation.navigate('Profile', { name });
+  };
+
+  const handleBlur = async (date, content) => {
+    try {
+      const userIdData = await getUserIdByName(name); // Получаем ID пользователя
+      const userId = userIdData.id; // Получаем ID из ответа
+      const result = await addNote(userId, content, date); // Добавляем заметку
+      console.log('Заметка добавлена:', result);
+    } catch (error) {
+      console.error('Ошибка при добавлении заметки:', error.message);
+    }
+  };
+
+  const handleChangeText = (text, date) => {
+    setNotes(prevNotes => ({
+      ...prevNotes,
+      [date]: text,  // Обновляем заметку для конкретного дня
+    }));
   };
 
   if (!fontsLoaded) {
@@ -72,7 +91,7 @@ export default function Notion({ navigation, route }) {
         <Text style={styles.dateText}>{formattedDate}</Text>
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.buttonIcon} onPress={handleProfile}>
-          <Image source={require('../assets/images/user-icon.png')} style={styles.userIcon} />
+            <Image source={require('../assets/images/user-icon.png')} style={styles.userIcon} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handlePrevWeek}>
             <Text style={styles.buttonText}>{'<'}</Text>
@@ -83,27 +102,24 @@ export default function Notion({ navigation, route }) {
         </View>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {daysOfWeek.map(({ formatted, weekday }) => (
-          <View key={formatted} style={styles.dayContainer}>
+        {daysOfWeek.map(({ formatted, weekday, date }) => (
+          <View key={date} style={styles.dayContainer}>
             <View style={styles.dayHeader}>
               <Text style={styles.dayText}>{formatted}</Text>
               <Text style={styles.dayAbbr}>{weekday}</Text>
             </View>
             <View style={styles.line} />
-            {(notes[formatted] || ['']).map((note, index) => (
-              <TextInput
-                key={index}
-                style={styles.input}
-                placeholderTextColor="gray"
-                value={note}
-                multiline={false}
-                textAlignVertical="center"
-                onChangeText={(text) => handleNoteChange(text, formatted, index)}
-              />
-            ))}
+            <TextInput
+              style={styles.input}
+              placeholderTextColor="gray"
+              multiline={false}
+              textAlignVertical="center"
+              value={notes[date] || ''} // Показываем заметку для конкретного дня
+              onChangeText={(text) => handleChangeText(text, date)} // Обновляем заметку для конкретного дня
+              onBlur={() => handleBlur(date, notes[date])} // Сохраняем заметку при потере фокуса
+            />
           </View>
         ))}
-
         <View style={{ height: 100 }} />
       </ScrollView>
     </View>

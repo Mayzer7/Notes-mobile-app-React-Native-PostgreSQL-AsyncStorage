@@ -227,6 +227,56 @@ app.patch('/update-password', async (req, res) => {
 
 
 
+// Получение id пользователя по имени
+app.get('/get-id-by-name', async (req, res) => {
+  const { name } = req.query;
+
+  if (!name) {
+    console.log("Ошибка: имя не передано");
+    return res.status(400).json({ error: 'Имя не передано' });
+  }
+
+  try {
+    const result = await pool.query('SELECT id FROM users WHERE name = $1', [name]);
+
+    if (result.rows.length > 0) {
+      console.log(`Найден пользователь с именем ${name}, ID: ${result.rows[0].id}`);
+      res.json({ id: result.rows[0].id });
+    } else {
+      console.log(`Пользователь с именем ${name} не найден`);
+      res.status(404).json({ error: 'Пользователь не найден' });
+    }
+  } catch (error) {
+    console.error('Ошибка при запросе id:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+
+
+// Добавление заметки
+app.post('/add-note', async (req, res) => {
+  const { id, content, date } = req.body;
+
+  if (!id || !content || !date) {
+    return res.status(400).json({ error: 'Все поля обязательны' });
+  }
+
+  try {
+    // Вставка заметки в таблицу notes
+    const result = await pool.query(
+      'INSERT INTO notes (id, content, date) VALUES ($1, $2, $3) RETURNING *',
+      [id, content, date]
+    );
+
+    console.log(`✅ Заметка добавлена для пользователя с ID: ${id}`);
+    res.status(201).json({ message: 'Заметка успешно добавлена', note: result.rows[0] });
+  } catch (error) {
+    console.error('❌ Ошибка при добавлении заметки:', error);
+    res.status(500).json({ error: 'Ошибка сервера при добавлении заметки' });
+  }
+});
+
 
 
 
