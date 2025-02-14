@@ -1,6 +1,8 @@
 import React, { useState, useEffect} from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
 import { useFonts } from 'expo-font';
+import { logoutUser } from '../utils/api';
+import { CommonActions } from '@react-navigation/native';
 
 export default function ProfileScreen({ navigation, route }) {
   const [fontsLoaded] = useFonts({
@@ -54,6 +56,29 @@ export default function ProfileScreen({ navigation, route }) {
     navigation.navigate('EditPassword', { name })
   };
 
+  const handleLogout = async () => {
+    try {
+        const success = await logoutUser();
+        if (success) {
+            console.log("Выход выполнен успешно");
+            
+            // Очищаем стек экранов и переходим на экран входа
+            navigation.dispatch(
+                CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'Email' }],  // Замените 'Email' на экран входа
+                })
+            );
+        } else {
+            console.log("Ошибка при выходе");
+        }
+    } catch (error) {
+        console.error("Ошибка выхода:", error.message);
+    }
+  };
+
+
+
   return (
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
@@ -99,6 +124,10 @@ export default function ProfileScreen({ navigation, route }) {
             </View>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity onPress={handleLogout}>
+          <Text style={styles.exit}>Выйти из аккаунта</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -200,6 +229,18 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     textAlign: 'center',
     top: 57,
+    fontFamily: 'Roboto_700Bold',
+    fontSize: 25,
+    color: 'white',
+    backgroundColor: 'black',
+    paddingVertical: 10, // Вертикальные отступы
+    paddingHorizontal: 20, // Горизонтальные отступы
+    borderRadius: 30, // Скругление углов
+  },
+  exit: {
+    alignSelf: 'center',
+    textAlign: 'center',
+    marginTop: 20,
     fontFamily: 'Roboto_700Bold',
     fontSize: 25,
     color: 'white',

@@ -92,10 +92,18 @@ export default function Notion({ navigation, route }) {
   // Функция для сохранения заметки при потере фокуса
   const handleBlur = async (date, content) => {
     try {
-      const userIdData = await getUserIdByName(name); // Получаем ID пользователя
-      const userId = userIdData.id; // Получаем ID из ответа
-      const result = await addNote(userId, content, date); // Добавляем заметку
-      console.log('Заметка добавлена:', result);
+      const userIdData = await getUserIdByName(name);
+      const userId = userIdData.id;
+      const result = await addNote(userId, content, date);
+  
+      // Преобразуем UTC-дату в локальный часовой пояс перед логированием
+      const localDate = new Date(result.note.date).toLocaleString('ru-RU', {
+        timeZone: 'Europe/Moscow', // Укажите нужный часовой пояс
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+  
+      console.log(`Заметка добавлена: ${content} на ${localDate}`);
     } catch (error) {
       console.error('Ошибка при добавлении заметки:', error.message);
     }

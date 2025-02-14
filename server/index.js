@@ -100,6 +100,12 @@ app.post('/login', async (req, res) => {
 
 
 
+// Выход пользователя
+app.post('/logout', (req, res) => {
+  // Очистка сессии или токена
+  res.json({ message: 'Выход выполнен успешно' });
+});
+
 
 
 

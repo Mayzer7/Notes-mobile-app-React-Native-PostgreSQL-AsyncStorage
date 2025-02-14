@@ -36,6 +36,32 @@ export const loginUser = async (name, password) => {
 };
 
 
+// Выход из аккаунта пользователя
+export const logoutUser = async () => {
+  const response = await fetch('http://192.168.0.104:3000/logout', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+  });
+
+  const textResponse = await response.text(); // Получаем ответ как текст
+  console.log("Ответ от сервера:", textResponse); // Логируем ответ сервера
+
+  try {
+      const data = JSON.parse(textResponse); // Пробуем распарсить как JSON
+      if (!response.ok) {
+          throw new Error(data.error || 'Ошибка при выходе');
+      }
+      return true;
+  } catch (error) {
+      console.error('Ошибка при разборе JSON:', error);
+      return false;
+  }
+};
+
+
+
 
 // Обновление имени пользователя
 export const updateUserName = async (oldName, newName) => {
