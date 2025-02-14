@@ -1,10 +1,10 @@
-import React, { useState, useEffect ,useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, Text, View, StatusBar, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useFonts } from 'expo-font';
 import { Roboto_700Bold } from '@expo-google-fonts/roboto';
-import { format, addDays, startOfWeek } from 'date-fns';
+import { format, addDays, startOfWeek, parseISO, setHours, setMinutes, setSeconds } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { getUserIdByName, addNote, getNoteByDate } from '../utils/api';
+import { getUserIdByName, addNote, getNotesForWeek } from '../utils/api';
 
 export default function Notion({ navigation, route }) {
   let [fontsLoaded] = useFonts({
@@ -12,10 +12,9 @@ export default function Notion({ navigation, route }) {
   });
 
   const { name } = route.params;
-  const nameUserId = name;
 
   const [currentDate, setCurrentDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  
+
   // Состояние для хранения заметок для каждого дня
   const [notes, setNotes] = useState({});
 
@@ -35,27 +34,49 @@ export default function Notion({ navigation, route }) {
     });
   }, [currentDate]);
 
+  // Функция для форматирования заметок
+  const formatNotes = (notesData) => {
+    const formattedNotes = {};
+    for (let key in notesData) {
+      // Преобразуем дату в формат yyyy-MM-dd
+      const date = new Date(key);
+      // Обнуляем время, чтобы избежать смещения по времени
+      const resetTimeDate = setHours(setMinutes(setSeconds(date, 0), 0), 0);
+      const formattedDate = format(resetTimeDate, 'yyyy-MM-dd');
+      formattedNotes[formattedDate] = notesData[key];
+    }
+    return formattedNotes;
+  };
+
+  // Функция для получения заметок за неделю
   const fetchNotes = async () => {
     try {
       const userIdData = await getUserIdByName(name);
       const userId = userIdData.id;
-  
-      const fetchedNotes = {};
-      for (const { date } of daysOfWeek) {
-        const noteData = await getNoteByDate(userId, date);
-        fetchedNotes[date] = noteData?.content || ''; // Если нет заметки, подставляем пустую строку
-      }
-      setNotes(fetchedNotes);
+
+      // Получаем startDate и endDate для текущей недели
+      const startDate = format(currentDate, 'yyyy-MM-dd');
+      const endDate = format(addDays(currentDate, 6), 'yyyy-MM-dd'); // 6 дней от начала недели
+
+      // Запрашиваем все заметки за неделю
+      const fetchedNotes = await getNotesForWeek(userId, startDate, endDate);
+
+      // Применяем функцию для форматирования данных
+      const formattedNotes = formatNotes(fetchedNotes?.data || {});
+
+      // Сохраняем заметки в состоянии
+      setNotes(formattedNotes); // Если данных нет, подставляем пустой объект
     } catch (error) {
       console.error('Ошибка при загрузке заметок:', error.message);
     }
   };
-  
+
   // Загружаем заметки при изменении даты
   useEffect(() => {
     fetchNotes();
   }, [currentDate]);
 
+  // Функции для изменения даты (недели)
   const handlePrevWeek = () => {
     setCurrentDate(prevDate => addDays(prevDate, -7));
   };
@@ -68,6 +89,7 @@ export default function Notion({ navigation, route }) {
     navigation.navigate('Profile', { name });
   };
 
+  // Функция для сохранения заметки при потере фокуса
   const handleBlur = async (date, content) => {
     try {
       const userIdData = await getUserIdByName(name); // Получаем ID пользователя
@@ -79,6 +101,7 @@ export default function Notion({ navigation, route }) {
     }
   };
 
+  // Функция для изменения текста заметки
   const handleChangeText = (text, date) => {
     setNotes(prevNotes => ({
       ...prevNotes,
@@ -124,7 +147,7 @@ export default function Notion({ navigation, route }) {
               placeholderTextColor="gray"
               multiline={false}
               textAlignVertical="center"
-              value={notes[date] || ''} // Показываем заметку для конкретного дня
+              value={notes[date]} // Показываем заметку для конкретного дня
               onChangeText={(text) => handleChangeText(text, date)} // Обновляем заметку для конкретного дня
               onBlur={() => handleBlur(date, notes[date])} // Сохраняем заметку при потере фокуса
             />

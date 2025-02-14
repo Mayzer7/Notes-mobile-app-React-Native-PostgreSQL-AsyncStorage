@@ -310,6 +310,46 @@ app.get('/get-note', async (req, res) => {
 
 
 
+// Получение заметок за неделю для конкретного пользователя
+app.get('/get-week-notes', async (req, res) => {
+  const { id, startDate, endDate } = req.query;
+
+  if (!id || !startDate || !endDate) {
+    return res.status(400).json({ error: 'ID пользователя, начальная и конечная дата обязательны' });
+  }
+
+  // Функция для установки фиксированного времени (например, 21:00:00)
+  const setFixedTime = (dateString) => {
+    const date = new Date(dateString);  // Преобразуем строку в объект Date
+    date.setHours(21, 0, 0, 0);  // Устанавливаем время на 21:00:00 (0 миллисекунд)
+    return date.toISOString().split('T')[0];  // Возвращаем только дату в формате YYYY-MM-DD
+  };
+
+  try {
+    const result = await pool.query(
+      'SELECT content, date FROM notes WHERE id = $1 AND date BETWEEN $2 AND $3',
+      [id, startDate, endDate]
+    );
+
+    if (result.rows.length > 0) {
+      const notes = result.rows.reduce((acc, row) => {
+        const formattedDate = setFixedTime(row.date);  // Устанавливаем фиксированное время
+        acc[formattedDate] = row.content;
+        return acc;
+      }, {});
+
+      res.json({ data: notes });  // Отправляем на клиент данные с фиксированным временем
+    } else {
+      res.json({ data: {} });
+    }
+  } catch (error) {
+    console.error('Ошибка при получении заметок:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+
+
 
 
 

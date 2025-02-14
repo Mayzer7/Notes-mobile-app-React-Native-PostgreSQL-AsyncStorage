@@ -166,3 +166,21 @@ export const getNoteByDate = async (userId, date) => {
     return null;
   }
 };
+
+export const getNotesForWeek = async (userId, startDate, endDate) => {
+  try {
+    const response = await fetch(`http://192.168.0.104:3000/get-week-notes?id=${userId}&startDate=${startDate}&endDate=${endDate}`);
+    
+    // Логируем полный ответ
+    const textResponse = await response.text();  // Получаем текстовый ответ, а не сразу JSON
+    console.log('Ответ от сервера:', textResponse);  // Логируем ответ
+
+    // Пробуем распарсить как JSON
+    const data = JSON.parse(textResponse);  
+    return data; // Вернет { data: { "2025-02-01": "Заметка 1", "2025-02-02": "Заметка 2", ... } }
+  } catch (error) {
+    console.error('Ошибка при получении заметок:', error);
+    return null;
+  }
+};
+
