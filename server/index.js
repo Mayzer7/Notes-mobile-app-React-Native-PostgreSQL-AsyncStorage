@@ -280,6 +280,39 @@ app.post('/add-note', async (req, res) => {
 
 
 
+// Получение заметки по дате для конкретного пользователя
+app.get('/get-note', async (req, res) => {
+  const { id, date } = req.query;
+
+  if (!id || !date) {
+    return res.status(400).json({ error: 'ID пользователя и дата обязательны' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT content FROM notes WHERE id = $1 AND date = $2',
+      [id, date]
+    );
+
+    if (result.rows.length > 0) {
+      // Если заметка найдена, возвращаем её
+      res.json({ content: result.rows[0].content });
+    } else {
+      // Если заметки нет, возвращаем пустое значение
+      res.json({ content: '' });
+    }
+  } catch (error) {
+    console.error('Ошибка при получении заметки:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+
+
+
+
+
+
 // Запуск сервера
 app.listen(PORT, () => {
   console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);

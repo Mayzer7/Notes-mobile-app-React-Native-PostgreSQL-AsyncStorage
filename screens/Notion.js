@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect ,useMemo } from 'react';
 import { StyleSheet, Text, View, StatusBar, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useFonts } from 'expo-font';
 import { Roboto_700Bold } from '@expo-google-fonts/roboto';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { getUserIdByName, addNote } from '../utils/api';
+import { getUserIdByName, addNote, getNoteByDate } from '../utils/api';
 
 export default function Notion({ navigation, route }) {
   let [fontsLoaded] = useFonts({
@@ -35,16 +35,26 @@ export default function Notion({ navigation, route }) {
     });
   }, [currentDate]);
 
-  const fetchUserId = async (nameUserId) => {
+  const fetchNotes = async () => {
     try {
-      const data = await getUserIdByName(name);
-      console.log(`ID пользователя: ${data.id}`);
+      const userIdData = await getUserIdByName(name);
+      const userId = userIdData.id;
+  
+      const fetchedNotes = {};
+      for (const { date } of daysOfWeek) {
+        const noteData = await getNoteByDate(userId, date);
+        fetchedNotes[date] = noteData?.content || ''; // Если нет заметки, подставляем пустую строку
+      }
+      setNotes(fetchedNotes);
     } catch (error) {
-      console.error('Ошибка:', error.message);
+      console.error('Ошибка при загрузке заметок:', error.message);
     }
   };
-
-  fetchUserId();
+  
+  // Загружаем заметки при изменении даты
+  useEffect(() => {
+    fetchNotes();
+  }, [currentDate]);
 
   const handlePrevWeek = () => {
     setCurrentDate(prevDate => addDays(prevDate, -7));

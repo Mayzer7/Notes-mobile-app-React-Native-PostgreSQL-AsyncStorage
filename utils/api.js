@@ -151,3 +151,18 @@ export const addNote = async (id, content, date) => {
 
   return await response.json();
 };
+
+
+
+
+
+export const getNoteByDate = async (userId, date) => {
+  try {
+    const response = await fetch(`http://192.168.0.104:3000/get-note?id=${userId}&date=${date}`);
+    const data = await response.json();
+    return data; // Вернет { content: заметка }
+  } catch (error) {
+    console.error('Ошибка при получении заметки:', error);
+    return null;
+  }
+};
