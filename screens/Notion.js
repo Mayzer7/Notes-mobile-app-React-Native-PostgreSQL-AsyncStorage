@@ -149,22 +149,35 @@ export default function Notion({ navigation, route }) {
   };
 
   const handleBlur = async (date, content, index) => {
-    if (!userId || content.trim() === "") return; // Не сохраняем пустые заметки
-    
-    try {
-      const notesForDay = notes[date]?.filter(note => note.trim() !== ""); // Убираем пустые заметки
-      await addNote(userId, JSON.stringify(notesForDay), date); // Сохраняем заметки
-
-      // Отмечаем, что заметка добавлена
-      setAddedNotes(prevState => ({
-        ...prevState,
-        [`${date}-${index}`]: true, // Помечаем добавленную заметку
-      }));
-
-      console.log(`Заметки на ${date}:`, notesForDay);
-    } catch (error) {
-      console.error('Ошибка при добавлении заметки:', error.message);
-    }
+    if (!userId) return;
+  
+    setNotes(prevNotes => {
+      let updatedNotes = { ...prevNotes };
+  
+      // Удаляем пустую заметку
+      updatedNotes[date] = updatedNotes[date].filter((note, i) => !(i === index && note.trim() === ""));
+  
+      // Если нет пустой строки в конце — добавляем её для новой заметки
+      if (updatedNotes[date].length === 0 || updatedNotes[date][updatedNotes[date].length - 1].trim() !== "") {
+        updatedNotes[date].push("");
+      }
+  
+      setTimeout(async () => {
+        try {
+          await addNote(userId, JSON.stringify(updatedNotes[date]), date);
+  
+          // Отмечаем, что заметка добавлена
+          setAddedNotes(prevState => ({
+            ...prevState,
+            [`${date}-${index}`]: true,
+          }));
+        } catch (error) {
+          console.error('Ошибка при обновлении заметок:', error.message);
+        }
+      }, 300);
+  
+      return updatedNotes;
+    });
   };
   
 

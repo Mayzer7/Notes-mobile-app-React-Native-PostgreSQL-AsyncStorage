@@ -275,17 +275,24 @@ app.post('/add-note', async (req, res) => {
     );
 
     let updatedContent;
+    let newNotes = JSON.parse(content);
+
+    if (!Array.isArray(newNotes)) newNotes = [];
+
+    if (newNotes.length === 0) {
+      // Если список заметок пуст — удаляем запись из БД
+      await pool.query('DELETE FROM notes WHERE id = $1 AND date = $2', [id, date]);
+      console.log(`🗑️ Заметки для пользователя с ID ${id} на дату ${date} удалены`);
+      return res.status(200).json({ message: 'Заметки удалены' });
+    }
 
     if (existingNote.rows.length > 0) {
       let existingNotes = JSON.parse(existingNote.rows[0].content);
-      let newNotes = JSON.parse(content);
-
       if (!Array.isArray(existingNotes)) existingNotes = [];
-      if (!Array.isArray(newNotes)) newNotes = [];
 
       // Полностью заменяем список заметок на новый
       updatedContent = JSON.stringify(newNotes);
-      
+
       await pool.query(
         'UPDATE notes SET content = $1 WHERE id = $2 AND date = $3 RETURNING *',
         [updatedContent, id, date]
@@ -294,7 +301,7 @@ app.post('/add-note', async (req, res) => {
       console.log(`✅ Обновлены заметки для пользователя с ID: ${id}`);
       res.status(200).json({ message: 'Заметки обновлены', note: updatedContent });
     } else {
-      updatedContent = JSON.stringify(JSON.parse(content)); // Убеждаемся, что content - это массив
+      updatedContent = JSON.stringify(newNotes); // Убеждаемся, что content - это массив
 
       await pool.query(
         'INSERT INTO notes (id, content, date) VALUES ($1, $2, $3) RETURNING *',
