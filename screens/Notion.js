@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, Text, View, StatusBar, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useFonts } from 'expo-font';
 import { Roboto_700Bold } from '@expo-google-fonts/roboto';
@@ -19,6 +19,10 @@ export default function Notion({ navigation, route }) {
   const [notes, setNotes] = useState({});
   const [addedNotes, setAddedNotes] = useState({}); // Состояние для отслеживания добавленных заметок
   const [completedTasks, setCompletedTasks] = useState({});
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const todayWeekday = format(new Date(), 'E', { locale: ru }).slice(0, 2).replace(/^./, str => str.toUpperCase());
+  
+  const scrollViewRef = useRef(null); // Создаём ref
 
   // Получаем userId только один раз при монтировании компонента
   useEffect(() => {
@@ -40,6 +44,21 @@ export default function Notion({ navigation, route }) {
       fetchNotes(); // Загружаем заметки только после получения userId
     }
   }, [currentDate, userId]);
+
+
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      const todayIndex = daysOfWeek.findIndex(({ date }) => date === today);
+      if (todayIndex !== -1) {
+        setTimeout(() => {
+          scrollViewRef.current.scrollTo({
+            y: todayIndex * 140,
+            animated: true,
+          });
+        }, 300);
+      }
+    }
+  }, [daysOfWeek]);
 
 
   const formattedDate = useMemo(() => {
@@ -184,45 +203,49 @@ export default function Notion({ navigation, route }) {
           </TouchableOpacity>
         </View>
       </View>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {daysOfWeek.map(({ formatted, weekday, date }) => (
-        <View key={date} style={styles.dayContainer}>
-          <View style={styles.dayHeader}>
-            <Text style={styles.dayText}>{formatted}</Text>
-            <Text style={styles.dayAbbr}>{weekday}</Text>
-          </View>
-          <View style={styles.line} />  
-          {(notes[date] || [""]).map((note, index) => {
-            // Проверяем, есть ли заметки, и не пустые ли они
-            const hasNotes = notes[date]?.some(n => n.trim() !== "");
+      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContainer}>
+        {daysOfWeek.map(({ formatted, weekday, date }) => (
+          <View key={date} style={styles.dayContainer}>
+            <View style={styles.dayHeader}>
+              <Text style={date === today ? styles.todayText : styles.dayText}>
+                {formatted}
+              </Text>
+              <Text style={date === today ? styles.todayWeekdayText : styles.weekdayText}>
+                {weekday}
+              </Text>
+            </View>
+            <View style={styles.line} />  
+            {(notes[date] || [""]).map((note, index) => {
+              // Проверяем, есть ли заметки, и не пустые ли они
+              const hasNotes = notes[date]?.some(n => n.trim() !== "");
 
-            return (
-              <View key={index} style={styles.noteContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholderTextColor="gray"
-                  multiline={false}
-                  textAlignVertical="center"
-                  value={note}
-                  onChangeText={(text) => handleChangeText(text, date, index)}
-                  onBlur={() => handleBlur(date, note, index)}
-                />
-                {note.trim() !== "" && ( // Показываем галочку только если заметка не пуста
-                  <TouchableOpacity onPress={() => toggleTaskCompletion(date, index)} style={styles.checkMarkContainer}>
-                    <Icon
-                      name={completedTasks[`${date}-${index}`] ? "check-circle" : "check-circle-outline"}
-                      style={[styles.checkMark, completedTasks[`${date}-${index}`] && styles.completedCheckMark]}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-            );
-          })}
-        </View>
-      ))}
-    <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+              return (
+                <View key={index} style={styles.noteContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholderTextColor="gray"
+                    multiline={false}
+                    textAlignVertical="center"
+                    value={note}
+                    onChangeText={(text) => handleChangeText(text, date, index)}
+                    onBlur={() => handleBlur(date, note, index)}
+                  />
+                  {note.trim() !== "" && ( // Показываем галочку только если заметка не пуста
+                    <TouchableOpacity onPress={() => toggleTaskCompletion(date, index)} style={styles.checkMarkContainer}>
+                      <Icon
+                        name={completedTasks[`${date}-${index}`] ? "check-circle" : "check-circle-outline"}
+                        style={[styles.checkMark, completedTasks[`${date}-${index}`] && styles.completedCheckMark]}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        ))}
+      <View style={{ height: 100 }} />
+        </ScrollView>
+      </View>
   );
 }
 
@@ -305,7 +328,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  dayAbbr: {
+  weekdayText: {
     fontFamily: 'Roboto_700Bold',
     fontSize: 40,
     right: 10,
@@ -313,10 +336,24 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     flex: 1,
   },
+  todayWeekdayText: {
+    fontFamily: 'Roboto_700Bold',
+    fontSize: 40,
+    right: 10,
+    color: 'blue',
+    textAlign: 'right',
+    flex: 1,
+  },
   dayText: {
     fontFamily: 'Roboto_700Bold',
     fontSize: 40,
     color: 'black',
+    marginLeft: 10,
+  },
+  todayText: {
+    fontFamily: 'Roboto_700Bold',
+    fontSize: 40,
+    color: 'blue',
     marginLeft: 10,
   },
   line: {
