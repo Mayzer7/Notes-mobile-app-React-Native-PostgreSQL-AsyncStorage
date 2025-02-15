@@ -42,7 +42,7 @@ export default function AuthScreen({ navigation }) {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonOutline} onPress={handleEmailLogin}>
-        <Text style={[styles.buttonText, { color: '#000' }]}>Продолжить с Email</Text> 
+        <Text style={[styles.buttonText, { color: '#000' }]}>Войти, зарегистрироваться</Text> 
       </TouchableOpacity>
 
       {/* Текст с условиями */}
@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: 100,
     backgroundColor: '#e0e0e0', // Цвет фона
     marginTop: 50,
   },

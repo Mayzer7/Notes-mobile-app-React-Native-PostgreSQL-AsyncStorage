@@ -75,7 +75,7 @@ export default function EmailScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Вход через Email</Text>
+      <Text style={styles.title}>Вход в аккаунт</Text>
       
       <TextInput
         style={styles.input}
@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: 120,
     backgroundColor: '#e0e0e0',
   },
   title: {
