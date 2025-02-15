@@ -8,6 +8,8 @@ import { getUserIdByName, addNote, getNotesForWeek } from '../utils/api';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export default function Notion({ navigation, route }) {
   let [fontsLoaded] = useFonts({
     Roboto_700Bold,
@@ -60,6 +62,20 @@ export default function Notion({ navigation, route }) {
     }
   }, [daysOfWeek]);
 
+  useEffect(() => {
+    const loadCompletedTasks = async () => {
+      try {
+        const storedTasks = await AsyncStorage.getItem('completedTasks');
+        if (storedTasks) {
+          setCompletedTasks(JSON.parse(storedTasks));
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки выполненных задач:', error);
+      }
+    };
+  
+    loadCompletedTasks();
+  }, []);
 
   const formattedDate = useMemo(() => {
     let date = format(currentDate, 'MMM yyyy', { locale: ru });
@@ -169,11 +185,19 @@ export default function Notion({ navigation, route }) {
     });
   };
 
-  const toggleTaskCompletion = (date, index) => {
-    setCompletedTasks(prevState => ({
-      ...prevState,
-      [`${date}-${index}`]: !prevState[`${date}-${index}`],
-    }));
+  const toggleTaskCompletion = async (date, index) => {
+    const newCompletedTasks = {
+      ...completedTasks,
+      [`${date}-${index}`]: !completedTasks[`${date}-${index}`],
+    };
+  
+    setCompletedTasks(newCompletedTasks);
+  
+    try {
+      await AsyncStorage.setItem('completedTasks', JSON.stringify(newCompletedTasks));
+    } catch (error) {
+      console.error('Ошибка сохранения выполненных задач:', error);
+    }
   };
   
 
