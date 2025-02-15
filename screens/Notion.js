@@ -246,7 +246,13 @@ export default function Notion({ navigation, route }) {
               return (
                 <View key={index} style={styles.noteContainer}>
                   <TextInput
-                    style={styles.input}
+                    style={[
+                      styles.input,
+                      {
+                        textDecorationLine: completedTasks[`${date}-${index}`] ? 'line-through' : 'none',
+                        color: completedTasks[`${date}-${index}`] ? 'gray' : 'black', // Меняем цвет текста
+                      },
+                    ]}
                     placeholderTextColor="gray"
                     multiline={false}
                     textAlignVertical="center"
@@ -407,5 +413,9 @@ const styles = StyleSheet.create({
   },
   completedCheckMark: {
     color: 'green',
-  }
+  },
+  completedText: {
+    textDecorationLine: 'line-through',
+    color: 'gray', // Можно сделать текст серым, чтобы визуально отличался
+  },
 });
