@@ -207,20 +207,20 @@ export default function Notion({ navigation, route }) {
                   onChangeText={(text) => handleChangeText(text, date, index)}
                   onBlur={() => handleBlur(date, note, index)}
                 />
-                {hasNotes && ( // Показываем галочку только если есть непустые заметки
+                {note.trim() !== "" && ( // Показываем галочку только если заметка не пуста
                   <TouchableOpacity onPress={() => toggleTaskCompletion(date, index)} style={styles.checkMarkContainer}>
                     <Icon
                       name={completedTasks[`${date}-${index}`] ? "check-circle" : "check-circle-outline"}
                       style={[styles.checkMark, completedTasks[`${date}-${index}`] && styles.completedCheckMark]}
                     />
                   </TouchableOpacity>
-                      )}
-                    </View>
-                  );
-                })}
+                )}
               </View>
-            ))}
-        <View style={{ height: 100 }} />
+            );
+          })}
+        </View>
+      ))}
+    <View style={{ height: 100 }} />
       </ScrollView>
     </View>
   );
