@@ -12,7 +12,6 @@ export default function Notion({ navigation, route }) {
   });
 
   const { name } = route.params;
-
   const [userId, setUserId] = useState(null); // Состояние для хранения userId
   const [currentDate, setCurrentDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [notes, setNotes] = useState({});
@@ -38,12 +37,18 @@ export default function Notion({ navigation, route }) {
     const formattedNotes = {};
     for (let key in notesData) {
       const date = new Date(key);
-      const resetTimeDate = setHours(setMinutes(setSeconds(date, 0), 0), 0);
-      const formattedDate = format(resetTimeDate, 'yyyy-MM-dd');
-      formattedNotes[formattedDate] = notesData[key];
+      const formattedDate = format(setHours(setMinutes(setSeconds(date, 0), 0), 0), 'yyyy-MM-dd');
+  
+      try {
+        formattedNotes[formattedDate] = JSON.parse(notesData[key]) || [""]; // Парсим JSON, если это массив
+      } catch {
+        formattedNotes[formattedDate] = [notesData[key] || ""]; // Если ошибка — просто строка
+      }
     }
     return formattedNotes;
   };
+  
+  
 
   // Получаем userId только один раз при монтировании компонента
   useEffect(() => {
@@ -61,18 +66,29 @@ export default function Notion({ navigation, route }) {
 
   // Функция для получения заметок за неделю
   const fetchNotes = async () => {
-    if (!userId) return; // Не запрашиваем заметки, если userId ещё не получен
-
+    if (!userId) return;
+  
     try {
       const startDate = format(currentDate, 'yyyy-MM-dd');
       const endDate = format(addDays(currentDate, 6), 'yyyy-MM-dd');
       const fetchedNotes = await getNotesForWeek(userId, startDate, endDate);
-      const formattedNotes = formatNotes(fetchedNotes?.data || {});
+      let formattedNotes = formatNotes(fetchedNotes?.data || {});
+  
+      // Гарантируем, что в каждом дне есть хотя бы одна пустая заметка
+      daysOfWeek.forEach(({ date }) => {
+        if (!formattedNotes[date]) {
+          formattedNotes[date] = [""];
+        } else if (!formattedNotes[date].includes("")) {
+          formattedNotes[date].push("");
+        }
+      });
+  
       setNotes(formattedNotes);
     } catch (error) {
       console.error('Ошибка при загрузке заметок:', error.message);
     }
   };
+  
 
   // Загружаем заметки при изменении даты
   useEffect(() => {
@@ -94,27 +110,36 @@ export default function Notion({ navigation, route }) {
   };
 
   const handleBlur = async (date, content) => {
-    if (!userId) return; // Если ID пользователя ещё нет, не сохраняем заметку
-
+    if (!userId || content.trim() === "") return; // Не сохраняем пустые заметки
+  
     try {
-      const result = await addNote(userId, content, date);
-      const localDate = new Date(result.note.date).toLocaleString('ru-RU', {
-        timeZone: 'Europe/Moscow',
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      });
-      console.log(`Заметка добавлена: ${content} на ${localDate}`);
+      const notesForDay = notes[date]?.filter(note => note.trim() !== ""); // Убираем пустые заметки
+      const result = await addNote(userId, JSON.stringify(notesForDay), date); // Сохраняем массив как JSON
+  
+      console.log(`Заметки на ${date}:`, notesForDay);
     } catch (error) {
       console.error('Ошибка при добавлении заметки:', error.message);
     }
   };
+  
 
-  const handleChangeText = (text, date) => {
-    setNotes(prevNotes => ({
-      ...prevNotes,
-      [date]: text, // Обновляем заметку для конкретного дня
-    }));
+  const handleChangeText = (text, date, index) => {
+    setNotes(prevNotes => {
+      const newNotes = { ...prevNotes };
+      
+      if (!newNotes[date]) newNotes[date] = [""]; // Если для даты еще нет заметок, создаем массив
+      
+      newNotes[date][index] = text; // Обновляем текст нужной заметки
+  
+      // Если пользователь заполнил последний input, добавляем новый пустой
+      if (index === newNotes[date].length - 1 && text.trim() !== "") {
+        newNotes[date].push("");
+      }
+  
+      return newNotes;
+    });
   };
+  
 
   if (!fontsLoaded) {
     return (
@@ -142,24 +167,27 @@ export default function Notion({ navigation, route }) {
         </View>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {daysOfWeek.map(({ formatted, weekday, date }) => (
-          <View key={date} style={styles.dayContainer}>
-            <View style={styles.dayHeader}>
-              <Text style={styles.dayText}>{formatted}</Text>
-              <Text style={styles.dayAbbr}>{weekday}</Text>
-            </View>
-            <View style={styles.line} />
+      {daysOfWeek.map(({ formatted, weekday, date }) => (
+        <View key={date} style={styles.dayContainer}>
+          <View style={styles.dayHeader}>
+            <Text style={styles.dayText}>{formatted}</Text>
+            <Text style={styles.dayAbbr}>{weekday}</Text>
+          </View>
+          <View style={styles.line} />  
+          {(notes[date] || [""]).map((note, index) => (
             <TextInput
+              key={index}
               style={styles.input}
               placeholderTextColor="gray"
               multiline={false}
               textAlignVertical="center"
-              value={notes[date]} // Показываем заметку для конкретного дня
-              onChangeText={(text) => handleChangeText(text, date)} // Обновляем заметку для конкретного дня
-              onBlur={() => handleBlur(date, notes[date])} // Сохраняем заметку при потере фокуса
+              value={note}
+              onChangeText={(text) => handleChangeText(text, date, index)}
+              onBlur={() => handleBlur(date, note)}
             />
-          </View>
-        ))}
+          ))}
+        </View>
+      ))}
         <View style={{ height: 100 }} />
       </ScrollView>
     </View>
