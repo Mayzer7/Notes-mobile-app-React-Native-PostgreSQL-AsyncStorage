@@ -26,6 +26,9 @@ export default function Notion({ navigation, route }) {
   
   const scrollViewRef = useRef(null); // Создаём ref
 
+  const todayRef = useRef(null);
+
+
   const [activeNote, setActiveNote] = useState(null);
 
   const truncateText = (text, maxLength = 25) => {
@@ -57,17 +60,14 @@ export default function Notion({ navigation, route }) {
 
   useEffect(() => {
     if (scrollViewRef.current) {
-      const todayIndex = daysOfWeek.findIndex(({ date }) => date === today);
-      if (todayIndex !== -1) {
-        setTimeout(() => {
-          scrollViewRef.current.scrollTo({
-            y: todayIndex * 140,
-            animated: true,
-          });
-        }, 300);
-      }
+      setTimeout(() => {
+        todayRef.current?.measure((x, y, width, height, pageX, pageY) => {
+          scrollViewRef.current.scrollTo({ y: pageY, animated: true });
+        });
+      }, 300);
     }
   }, [daysOfWeek]);
+  
 
   useEffect(() => {
     const loadCompletedTasks = async () => {
@@ -249,7 +249,7 @@ export default function Notion({ navigation, route }) {
       </View>
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContainer}>
         {daysOfWeek.map(({ formatted, weekday, date }) => (
-          <View key={date} style={styles.dayContainer}>
+          <View key={date} ref={date === today ? todayRef : null} style={styles.dayContainer}>
             <View style={styles.dayHeader}>
               <Text style={date === today ? styles.todayText : styles.dayText}>
                 {formatted}
