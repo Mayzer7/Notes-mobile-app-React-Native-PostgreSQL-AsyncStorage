@@ -26,6 +26,13 @@ export default function Notion({ navigation, route }) {
   
   const scrollViewRef = useRef(null); // Создаём ref
 
+  const [activeNote, setActiveNote] = useState(null);
+
+  const truncateText = (text, maxLength = 25) => {
+    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+  };
+
+
   // Получаем userId только один раз при монтировании компонента
   useEffect(() => {
     const fetchUserId = async () => {
@@ -263,17 +270,22 @@ export default function Notion({ navigation, route }) {
                       styles.input,
                       {
                         textDecorationLine: completedTasks[`${date}-${index}`] ? 'line-through' : 'none',
-                        color: completedTasks[`${date}-${index}`] ? 'gray' : 'black', // Меняем цвет текста
+                        color: completedTasks[`${date}-${index}`] ? 'gray' : 'black',
                       },
                     ]}
                     placeholderTextColor="gray"
                     multiline={false}
                     textAlignVertical="center"
-                    value={note}
+                    value={activeNote === `${date}-${index}` ? note : truncateText(note)}
+                    onFocus={() => setActiveNote(`${date}-${index}`)} // Когда фокусируемся, сохраняем ключ заметки
+                    onBlur={() => {
+                      setActiveNote(null); // Когда убираем фокус, сбрасываем активную заметку
+                      handleBlur(date, note, index);
+                    }}
                     onChangeText={(text) => handleChangeText(text, date, index)}
-                    onBlur={() => handleBlur(date, note, index)}
                   />
-                  {note.trim() !== "" && ( // Показываем галочку только если заметка не пуста
+
+                  {note.trim() !== "" && activeNote !== `${date}-${index}` && ( // Показываем галочку только если заметка не активна
                     <TouchableOpacity onPress={() => toggleTaskCompletion(date, index)} style={styles.checkMarkContainer}>
                       <Icon
                         name={completedTasks[`${date}-${index}`] ? "check-circle" : "check-circle-outline"}
