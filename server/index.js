@@ -269,19 +269,40 @@ app.post('/add-note', async (req, res) => {
   }
 
   try {
-    // Вставка заметки в таблицу notes
-    const result = await pool.query(
-      'INSERT INTO notes (id, content, date) VALUES ($1, $2, $3) RETURNING *',
-      [id, content, date]
+    const existingNote = await pool.query(
+      'SELECT content FROM notes WHERE id = $1 AND date = $2',
+      [id, date]
     );
 
-    console.log(`✅ Заметка добавлена для пользователя с ID: ${id}`);
-    res.status(201).json({ message: 'Заметка успешно добавлена', note: result.rows[0] });
+    if (existingNote.rows.length > 0) {
+      // Объединяем списки и удаляем дубликаты
+      const updatedContent = JSON.stringify(
+        Array.from(new Set([...JSON.parse(existingNote.rows[0].content), ...JSON.parse(content)]))
+      );
+
+      const result = await pool.query(
+        'UPDATE notes SET content = $1 WHERE id = $2 AND date = $3 RETURNING *',
+        [updatedContent, id, date]
+      );
+
+      console.log(`✅ Обновлена заметка для пользователя с ID: ${id}`);
+      res.status(200).json({ message: 'Заметка обновлена', note: result.rows[0] });
+    } else {
+      const result = await pool.query(
+        'INSERT INTO notes (id, content, date) VALUES ($1, $2, $3) RETURNING *',
+        [id, content, date]
+      );
+
+      console.log(`✅ Добавлена новая заметка для пользователя с ID: ${id}`);
+      res.status(201).json({ message: 'Заметка добавлена', note: result.rows[0] });
+    }
   } catch (error) {
-    console.error('❌ Ошибка при добавлении заметки:', error);
-    res.status(500).json({ error: 'Ошибка сервера при добавлении заметки' });
+    console.error('❌ Ошибка при добавлении/обновлении заметки:', error);
+    res.status(500).json({ error: 'Ошибка сервера при добавлении/обновлении заметки' });
   }
 });
+
+
 
 
 
