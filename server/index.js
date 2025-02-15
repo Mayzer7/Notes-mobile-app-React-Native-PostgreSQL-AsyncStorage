@@ -274,33 +274,42 @@ app.post('/add-note', async (req, res) => {
       [id, date]
     );
 
-    if (existingNote.rows.length > 0) {
-      // Объединяем списки и удаляем дубликаты
-      const updatedContent = JSON.stringify(
-        Array.from(new Set([...JSON.parse(existingNote.rows[0].content), ...JSON.parse(content)]))
-      );
+    let updatedContent;
 
-      const result = await pool.query(
+    if (existingNote.rows.length > 0) {
+      let existingNotes = JSON.parse(existingNote.rows[0].content);
+      let newNotes = JSON.parse(content);
+
+      if (!Array.isArray(existingNotes)) existingNotes = [];
+      if (!Array.isArray(newNotes)) newNotes = [];
+
+      // Полностью заменяем список заметок на новый
+      updatedContent = JSON.stringify(newNotes);
+      
+      await pool.query(
         'UPDATE notes SET content = $1 WHERE id = $2 AND date = $3 RETURNING *',
         [updatedContent, id, date]
       );
 
-      console.log(`✅ Обновлена заметка для пользователя с ID: ${id}`);
-      res.status(200).json({ message: 'Заметка обновлена', note: result.rows[0] });
+      console.log(`✅ Обновлены заметки для пользователя с ID: ${id}`);
+      res.status(200).json({ message: 'Заметки обновлены', note: updatedContent });
     } else {
-      const result = await pool.query(
+      updatedContent = JSON.stringify(JSON.parse(content)); // Убеждаемся, что content - это массив
+
+      await pool.query(
         'INSERT INTO notes (id, content, date) VALUES ($1, $2, $3) RETURNING *',
-        [id, content, date]
+        [id, updatedContent, date]
       );
 
-      console.log(`✅ Добавлена новая заметка для пользователя с ID: ${id}`);
-      res.status(201).json({ message: 'Заметка добавлена', note: result.rows[0] });
+      console.log(`✅ Добавлены новые заметки для пользователя с ID: ${id}`);
+      res.status(201).json({ message: 'Заметки добавлены', note: updatedContent });
     }
   } catch (error) {
-    console.error('❌ Ошибка при добавлении/обновлении заметки:', error);
-    res.status(500).json({ error: 'Ошибка сервера при добавлении/обновлении заметки' });
+    console.error('❌ Ошибка при добавлении/обновлении заметок:', error);
+    res.status(500).json({ error: 'Ошибка сервера при добавлении/обновлении заметок' });
   }
 });
+
 
 
 

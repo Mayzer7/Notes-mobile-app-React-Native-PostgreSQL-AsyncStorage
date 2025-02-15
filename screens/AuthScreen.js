@@ -42,7 +42,7 @@ export default function AuthScreen({ navigation }) {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonOutline} onPress={handleEmailLogin}>
-        <Text style={[styles.buttonText, { color: '#000' }]}>Войти, зарегистрироваться</Text> 
+        <Text style={[styles.buttonText, { color: '#000' }]}>Вход в аккаунт</Text> 
       </TouchableOpacity>
 
       {/* Текст с условиями */}
