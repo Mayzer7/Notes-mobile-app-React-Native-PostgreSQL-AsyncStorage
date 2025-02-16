@@ -230,36 +230,6 @@ app.patch('/update-password', async (req, res) => {
 });
 
 
-
-
-
-// Получение id пользователя по имени
-app.get('/get-id-by-name', async (req, res) => {
-  const { name } = req.query;
-
-  if (!name) {
-    console.log("Ошибка: имя не передано");
-    return res.status(400).json({ error: 'Имя не передано' });
-  }
-
-  try {
-    const result = await pool.query('SELECT id FROM users WHERE name = $1', [name]);
-
-    if (result.rows.length > 0) {
-      console.log(`Найден пользователь с именем ${name}, ID: ${result.rows[0].id}`);
-      res.json({ id: result.rows[0].id });
-    } else {
-      console.log(`Пользователь с именем ${name} не найден`);
-      res.status(404).json({ error: 'Пользователь не найден' });
-    }
-  } catch (error) {
-    console.error('Ошибка при запросе id:', error);
-    res.status(500).json({ error: 'Ошибка сервера' });
-  }
-});
-
-
-
 // Добавление заметки
 app.post('/add-note', async (req, res) => {
   const { id, content, date } = req.body;
@@ -319,36 +289,32 @@ app.post('/add-note', async (req, res) => {
 
 
 
+// Получение id пользователя по имени
+app.get('/get-id-by-name', async (req, res) => {
+  const { name } = req.query;
 
-
-
-
-// Получение заметки по дате для конкретного пользователя
-app.get('/get-note', async (req, res) => {
-  const { id, date } = req.query;
-
-  if (!id || !date) {
-    return res.status(400).json({ error: 'ID пользователя и дата обязательны' });
+  if (!name) {
+    console.log("Ошибка: имя не передано");
+    return res.status(400).json({ error: 'Имя не передано' });
   }
 
   try {
-    const result = await pool.query(
-      'SELECT content FROM notes WHERE id = $1 AND date = $2',
-      [id, date]
-    );
+    const result = await pool.query('SELECT id FROM users WHERE name = $1', [name]);
 
     if (result.rows.length > 0) {
-      // Если заметка найдена, возвращаем её
-      res.json({ content: result.rows[0].content });
+      console.log(`Найден пользователь с именем ${name}, ID: ${result.rows[0].id}`);
+      res.json({ id: result.rows[0].id });
     } else {
-      // Если заметки нет, возвращаем пустое значение
-      res.json({ content: '' });
+      console.log(`Пользователь с именем ${name} не найден`);
+      res.status(404).json({ error: 'Пользователь не найден' });
     }
   } catch (error) {
-    console.error('Ошибка при получении заметки:', error);
+    console.error('Ошибка при запросе id:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
+
+
 
 
 

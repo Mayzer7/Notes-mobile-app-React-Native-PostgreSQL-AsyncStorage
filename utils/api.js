@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // Регистрация пользователя
 export const registerUser = async (name, email, password) => {
     const response = await fetch('http://192.168.0.104:3000/register', {
@@ -121,45 +123,6 @@ export const updatePassword = async (name, newPassword) => {
 };
 
 
-
-
-
-// Получение id пользователя по имени
-export const getUserIdByName = async (name) => {
-  if (!name) {
-    throw new Error('Имя не передано');
-  }
-
-  const response = await fetch(`http://192.168.0.104:3000/get-id-by-name?name=${name}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  const textResponse = await response.text(); // Получаем ответ как текст
-  console.log("Ответ от сервера:", textResponse); // Логируем ответ сервера
-
-  try {
-    const data = JSON.parse(textResponse); // Парсим ответ вручную
-
-    if (data.error) {
-      throw new Error(data.error); // Если ошибка в ответе, выбрасываем её
-    }
-
-    console.log("ID пользователя:", data.id); // Логируем ID
-    return data; // Возвращаем данные, если всё ок
-  } catch (error) {
-    console.error('Ошибка:', error.message); // Логируем ошибку
-    throw new Error(error.message); // Генерируем ошибку для обработки на клиенте
-  }
-};
-
-
-
-
-
-
 // Добавление заметки
 export const addNote = async (id, content, date) => {
   const response = await fetch('http://192.168.0.104:3000/add-note', {
@@ -175,38 +138,87 @@ export const addNote = async (id, content, date) => {
     throw new Error(errorData.error || 'Ошибка при добавлении заметки');
   }
 
+  // Очищаем весь кеш после успешного добавления заметки
+  await AsyncStorage.clear();
+
   return await response.json();
 };
 
 
+// Получение id пользователя по имени
+export const getUserIdByName = async (name) => {
+  if (!name) {
+    throw new Error('Имя не передано');
+  }
 
+  const cacheKey = `userId_${name}`;
 
-
-export const getNoteByDate = async (userId, date) => {
   try {
-    const response = await fetch(`http://192.168.0.104:3000/get-note?id=${userId}&date=${date}`);
-    const data = await response.json();
-    return data; // Вернет { content: заметка }
+    // Проверяем кеш
+    const cachedId = await AsyncStorage.getItem(cacheKey);
+    if (cachedId) {
+      console.log(`ID пользователя из кеша: ${cachedId}`);
+      return { id: cachedId };
+    }
+
+    // Если в кеше нет, делаем запрос
+    const response = await fetch(`http://192.168.0.104:3000/get-id-by-name?name=${name}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const textResponse = await response.text();
+    console.log("Ответ от сервера:", textResponse);
+
+    const data = JSON.parse(textResponse);
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    // Сохраняем ID в кеш
+    await AsyncStorage.setItem(cacheKey, data.id.toString());
+
+    console.log("ID пользователя:", data.id);
+    return data;
   } catch (error) {
-    console.error('Ошибка при получении заметки:', error);
-    return null;
+    console.error('Ошибка:', error.message);
+    throw new Error(error.message);
   }
 };
 
+
+// Получение заметок на всю неделю
 export const getNotesForWeek = async (userId, startDate, endDate) => {
+  const cacheKey = `notes_${userId}_${startDate}_${endDate}`;
+
   try {
+    // Проверяем кеш
+    const cachedNotes = await AsyncStorage.getItem(cacheKey);
+    if (cachedNotes) {
+      console.log(`Заметки из кеша: ${cacheKey}`, JSON.parse(cachedNotes));
+      return { data: JSON.parse(cachedNotes) }; // Возвращаем объект с ключом data, как в оригинале
+    }
+
+    // Если кеша нет, запрашиваем данные с сервера
     const response = await fetch(`http://192.168.0.104:3000/get-week-notes?id=${userId}&startDate=${startDate}&endDate=${endDate}`);
     
-    // Логируем полный ответ
-    const textResponse = await response.text();  // Получаем текстовый ответ, а не сразу JSON
-    console.log('Ответ от сервера:', textResponse);  // Логируем ответ
+    const textResponse = await response.text();
+    console.log('Ответ от сервера:', textResponse);
 
-    // Пробуем распарсить как JSON
-    const data = JSON.parse(textResponse);  
-    return data; // Вернет { data: { "2025-02-01": "Заметка 1", "2025-02-02": "Заметка 2", ... } }
+    const data = JSON.parse(textResponse);
+
+    if (data.data) {
+      // Сохраняем в кеш именно `data.data`, а не весь объект
+      await AsyncStorage.setItem(cacheKey, JSON.stringify(data.data));
+    }
+
+    return data; // Возвращаем данные в том же формате, что и оригинальная функция
   } catch (error) {
     console.error('Ошибка при получении заметок:', error);
-    return null;
+    return { data: {} }; // Возвращаем пустой объект внутри data, чтобы избежать ошибок на клиенте
   }
 };
 
