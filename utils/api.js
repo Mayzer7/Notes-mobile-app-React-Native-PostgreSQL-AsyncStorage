@@ -1,5 +1,23 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
+// Функции для вычисления начала и конца недели
+const getStartOfWeek = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Устанавливаем на понедельник
+  const startOfWeek = new Date(d.setDate(diff));
+  return startOfWeek.toISOString().split('T')[0]; // YYYY-MM-DD
+};
+
+const getEndOfWeek = (date) => {
+  const startOfWeek = new Date(getStartOfWeek(date));
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(endOfWeek.getDate() + 6); // Воскресенье той же недели
+  return endOfWeek.toISOString().split('T')[0]; // YYYY-MM-DD
+};
+
+
 // Регистрация пользователя
 export const registerUser = async (name, email, password) => {
     const response = await fetch('http://192.168.0.104:3000/register', {
@@ -138,8 +156,15 @@ export const addNote = async (id, content, date) => {
     throw new Error(errorData.error || 'Ошибка при добавлении заметки');
   }
 
-  // Очищаем весь кеш после успешного добавления заметки
-  await AsyncStorage.clear();
+  // Парсим дату, чтобы удалить кеш только текущей недели
+  const noteDate = new Date(date);
+  const startOfWeek = getStartOfWeek(noteDate);
+  const endOfWeek = getEndOfWeek(noteDate);
+
+  const cacheKey = `notes_${id}_${startOfWeek}_${endOfWeek}`;
+
+  // Удаляем кеш только текущей недели
+  await AsyncStorage.removeItem(cacheKey);
 
   return await response.json();
 };
