@@ -258,7 +258,12 @@ export default function Notion({ navigation, route }) {
                 {weekday}
               </Text>
             </View>
-            <View style={styles.line} />  
+            <View
+              style={[
+                styles.line,
+                { borderBottomColor: date === today ? 'blue' : 'black' }
+              ]}
+            /> 
             {(notes[date] || [""]).map((note, index) => {
               // Проверяем, есть ли заметки, и не пустые ли они
               const hasNotes = notes[date]?.some(n => n.trim() !== "");
@@ -266,6 +271,7 @@ export default function Notion({ navigation, route }) {
               return (
                 <View key={index} style={styles.noteContainer}>
                   <TextInput
+                    maxLength={200}
                     style={[
                       styles.input,
                       {
