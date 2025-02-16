@@ -218,16 +218,22 @@ export const getUserIdByName = async (name) => {
 // Получение заметок на всю неделю
 export const getNotesForWeek = async (userId, startDate, endDate) => {
   const cacheKey = `notes_${userId}_${startDate}_${endDate}`;
+  const cacheTimeKey = `notes_time_${userId}_${startDate}_${endDate}`;
 
   try {
     // Проверяем кеш
     const cachedNotes = await AsyncStorage.getItem(cacheKey);
-    if (cachedNotes) {
+    const cacheTimestamp = await AsyncStorage.getItem(cacheTimeKey);
+
+    const now = Date.now();
+    const fiveMinutes = 5 * 60 * 1000; // 5 минут в миллисекундах
+
+    if (cachedNotes && cacheTimestamp && now - parseInt(cacheTimestamp, 10) < fiveMinutes) {
       console.log(`Заметки из кеша: ${cacheKey}`, JSON.parse(cachedNotes));
-      return { data: JSON.parse(cachedNotes) }; // Возвращаем объект с ключом data, как в оригинале
+      return { data: JSON.parse(cachedNotes) };
     }
 
-    // Если кеша нет, запрашиваем данные с сервера
+    // Если кеш устарел или его нет, запрашиваем данные с сервера
     const response = await fetch(`http://192.168.0.104:3000/get-week-notes?id=${userId}&startDate=${startDate}&endDate=${endDate}`);
     
     const textResponse = await response.text();
@@ -236,14 +242,15 @@ export const getNotesForWeek = async (userId, startDate, endDate) => {
     const data = JSON.parse(textResponse);
 
     if (data.data) {
-      // Сохраняем в кеш именно `data.data`, а не весь объект
+      // Сохраняем данные и время их получения
       await AsyncStorage.setItem(cacheKey, JSON.stringify(data.data));
+      await AsyncStorage.setItem(cacheTimeKey, now.toString());
     }
 
-    return data; // Возвращаем данные в том же формате, что и оригинальная функция
+    return data;
   } catch (error) {
     console.error('Ошибка при получении заметок:', error);
-    return { data: {} }; // Возвращаем пустой объект внутри data, чтобы избежать ошибок на клиенте
+    return { data: {} };
   }
 };
 
