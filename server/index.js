@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs'); // Подключаем bcryptjs
 const { pool } = require('./db');
 
 const app = express();
+const HOST = "0.0.0.0"; // Слушаем все IP
 const PORT = 3000;
 
 app.use(cors());
@@ -360,9 +361,7 @@ app.get('/get-week-notes', async (req, res) => {
 
 
 
-
-
 // Запуск сервера
-app.listen(PORT, () => {
-  console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Сервер запущен на http://${HOST}:${PORT}`);
 });
