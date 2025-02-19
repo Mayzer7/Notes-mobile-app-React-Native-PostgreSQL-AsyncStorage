@@ -21,11 +21,7 @@ const getEndOfWeek = (date) => {
 
 // Регистрация пользователя
 export const registerUser = async (name, email, password) => {
-<<<<<<< HEAD
     const response = await fetch(`${BASE_URL}/register`, {
-=======
-    const response = await fetch('https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/register', {
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,11 +40,7 @@ export const registerUser = async (name, email, password) => {
 
 // Вход пользователя
 export const loginUser = async (name, password) => {
-<<<<<<< HEAD
   const response = await fetch(`${BASE_URL}/login`, {
-=======
-  const response = await fetch('https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/login', {
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -67,11 +59,7 @@ export const loginUser = async (name, password) => {
 
 // Выход из аккаунта пользователя
 export const logoutUser = async () => {
-<<<<<<< HEAD
   const response = await fetch(`${BASE_URL}/logout`, {
-=======
-  const response = await fetch('https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/logout', {
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -98,11 +86,7 @@ export const logoutUser = async () => {
 
 // Обновление имени пользователя
 export const updateUserName = async (oldName, newName) => {
-<<<<<<< HEAD
   const response = await fetch(`${BASE_URL}/update-name`, {
-=======
-  const response = await fetch('https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/update-name', {
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -122,11 +106,7 @@ export const updateUserName = async (oldName, newName) => {
 
 // Обновление почты пользователя
 export const updateEmail = async (name, newEmail) => {
-<<<<<<< HEAD
   const response = await fetch(`${BASE_URL}/update-email`, {
-=======
-  const response = await fetch('https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/update-email', {
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -145,11 +125,7 @@ export const updateEmail = async (name, newEmail) => {
 
 // Обновление пароля пользователя
 export const updatePassword = async (name, newPassword) => {
-<<<<<<< HEAD
   const response = await fetch(`${BASE_URL}/update-password`, {
-=======
-  const response = await fetch('https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/update-password', {
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -168,11 +144,7 @@ export const updatePassword = async (name, newPassword) => {
 
 // Добавление заметки
 export const addNote = async (id, content, date) => {
-<<<<<<< HEAD
   const response = await fetch(`${BASE_URL}/add-note`, {
-=======
-  const response = await fetch('https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/add-note', {
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -216,11 +188,7 @@ export const getUserIdByName = async (name) => {
     }
 
     // Если в кеше нет, делаем запрос
-<<<<<<< HEAD
     const response = await fetch(`${BASE_URL}/get-id-by-name?name=${name}`, {
-=======
-    const response = await fetch(`https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/get-id-by-name?name=${name}`, {
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -267,11 +235,7 @@ export const getNotesForWeek = async (userId, startDate, endDate) => {
     }
 
     // Если кеш устарел или его нет, запрашиваем данные с сервера
-<<<<<<< HEAD
     const response = await fetch(`${BASE_URL}/get-week-notes?id=${userId}&startDate=${startDate}&endDate=${endDate}`);
-=======
-    const response = await fetch(`https://919e-2a01-4f8-1c1e-4ebe-00-1.ngrok-free.app/get-week-notes?id=${userId}&startDate=${startDate}&endDate=${endDate}`);
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
     
     const textResponse = await response.text();
     console.log('Ответ от сервера:', textResponse);
