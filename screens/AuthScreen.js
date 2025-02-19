@@ -8,8 +8,12 @@ export default function AuthScreen({ navigation }) {
   });
 
   if (!fontsLoaded) {
-    return <Text>Загрузка...</Text>;
-  }
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', fontSize: 40, }}>
+          <Text>Загрузка...</Text>
+        </View>
+      );
+    }
 
   const handleGoogleLogin = () => {
     // Логика аутентификации через Google
@@ -67,7 +71,11 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     marginBottom: 40,
+<<<<<<< HEAD
     marginLeft: 20,
+=======
+    marginLeft: 25,
+>>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
   },
   button: {
     backgroundColor: 'white',

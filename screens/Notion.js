@@ -339,7 +339,11 @@ const styles = StyleSheet.create({
     marginTop: 40,
     left: 10,
     fontFamily: 'Roboto_700Bold',
+<<<<<<< HEAD
     fontSize: 33,
+=======
+    fontSize: 35,
+>>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
     color: 'black',
   },
   buttonsContainer: {
