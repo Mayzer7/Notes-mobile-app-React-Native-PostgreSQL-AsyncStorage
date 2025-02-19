@@ -1,6 +1,12 @@
 
 # Мобильное приложение заметок - Notes
 
+![1 (1)](https://github.com/user-attachments/assets/33ac22b3-5494-4d1c-9e34-a1dbfeab077f)
+![2 (2)](https://github.com/user-attachments/assets/4b1f3721-32cc-4073-844e-4f1c8911aed9)
+![3 (3)](https://github.com/user-attachments/assets/7b65d731-3e91-465e-96e0-115e12fd204b)
+![4 (4)](https://github.com/user-attachments/assets/797aeba5-4248-4aaf-8b8a-6ce401ab5767)
+![5 (5)](https://github.com/user-attachments/assets/d136884f-9279-4942-8959-ee5c08c846a0)
+
 ## Описание
 
 Мобильное приложение на React Native для создания и управления заметками. Приложение использует базу данных PostgreSQL для хранения информации о пользователях и их заметках и AsyncStorage для хранения состояний пользователя и кеширования.
