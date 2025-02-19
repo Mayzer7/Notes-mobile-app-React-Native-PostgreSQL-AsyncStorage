@@ -71,11 +71,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     marginBottom: 40,
-<<<<<<< HEAD
     marginLeft: 20,
-=======
-    marginLeft: 25,
->>>>>>> baebb02b843c3a2d2f8a165b5306f8dfbccee40d
   },
   button: {
     backgroundColor: 'white',
