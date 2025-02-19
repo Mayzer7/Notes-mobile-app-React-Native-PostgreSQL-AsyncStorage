@@ -62,12 +62,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 100,
     backgroundColor: '#e0e0e0', // Цвет фона
-    marginTop: 50,
   },
   logo: {
     width: 100,
     height: 100,
     marginBottom: 40,
+    marginLeft: 20,
   },
   button: {
     backgroundColor: 'white',

@@ -9,29 +9,27 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@expo-google-fonts/poppins": "^0.2.3",
     "@expo-google-fonts/roboto": "^0.2.3",
-    "@react-native-async-storage/async-storage": "^2.1.1",
+    "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
-    "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "date-fns": "^4.1.0",
-    "expo": "~52.0.31",
+    "date-fns": "^2.0.0",
+    "expo": "~52.0.35",
     "expo-font": "~13.0.3",
-    "expo-sqlite": "~15.1.2",
     "expo-status-bar": "~2.0.1",
-    "express": "^4.21.2",
-    "pg": "^8.13.3",
     "react": "18.3.1",
     "react-native": "0.76.7",
-    "react-native-safe-area-context": "^5.2.0",
-    "react-native-screens": "^4.6.0",
-    "react-native-vector-icons": "^10.2.0"
+    "expo-updates": "~0.26.18"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
+    }
   },
   "private": true
 }

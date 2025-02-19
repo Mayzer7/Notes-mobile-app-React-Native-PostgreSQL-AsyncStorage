@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export const BASE_URL = 'http://your_IPv4_adress:3000';
 
 // Функции для вычисления начала и конца недели
 const getStartOfWeek = (date) => {
@@ -20,7 +21,7 @@ const getEndOfWeek = (date) => {
 
 // Регистрация пользователя
 export const registerUser = async (name, email, password) => {
-    const response = await fetch('http://192.168.0.104:3000/register', {
+    const response = await fetch(`${BASE_URL}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +40,7 @@ export const registerUser = async (name, email, password) => {
 
 // Вход пользователя
 export const loginUser = async (name, password) => {
-  const response = await fetch('http://192.168.0.104:3000/login', {
+  const response = await fetch(`${BASE_URL}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -58,7 +59,7 @@ export const loginUser = async (name, password) => {
 
 // Выход из аккаунта пользователя
 export const logoutUser = async () => {
-  const response = await fetch('http://192.168.0.104:3000/logout', {
+  const response = await fetch(`${BASE_URL}/logout`, {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ export const logoutUser = async () => {
 
 // Обновление имени пользователя
 export const updateUserName = async (oldName, newName) => {
-  const response = await fetch('http://192.168.0.104:3000/update-name', {
+  const response = await fetch(`${BASE_URL}/update-name`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -105,7 +106,7 @@ export const updateUserName = async (oldName, newName) => {
 
 // Обновление почты пользователя
 export const updateEmail = async (name, newEmail) => {
-  const response = await fetch('http://192.168.0.104:3000/update-email', {
+  const response = await fetch(`${BASE_URL}/update-email`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -124,7 +125,7 @@ export const updateEmail = async (name, newEmail) => {
 
 // Обновление пароля пользователя
 export const updatePassword = async (name, newPassword) => {
-  const response = await fetch('http://192.168.0.104:3000/update-password', {
+  const response = await fetch(`${BASE_URL}/update-password`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -143,7 +144,7 @@ export const updatePassword = async (name, newPassword) => {
 
 // Добавление заметки
 export const addNote = async (id, content, date) => {
-  const response = await fetch('http://192.168.0.104:3000/add-note', {
+  const response = await fetch(`${BASE_URL}/add-note`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -187,7 +188,7 @@ export const getUserIdByName = async (name) => {
     }
 
     // Если в кеше нет, делаем запрос
-    const response = await fetch(`http://192.168.0.104:3000/get-id-by-name?name=${name}`, {
+    const response = await fetch(`${BASE_URL}/get-id-by-name?name=${name}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -234,7 +235,7 @@ export const getNotesForWeek = async (userId, startDate, endDate) => {
     }
 
     // Если кеш устарел или его нет, запрашиваем данные с сервера
-    const response = await fetch(`http://192.168.0.104:3000/get-week-notes?id=${userId}&startDate=${startDate}&endDate=${endDate}`);
+    const response = await fetch(`${BASE_URL}/get-week-notes?id=${userId}&startDate=${startDate}&endDate=${endDate}`);
     
     const textResponse = await response.text();
     console.log('Ответ от сервера:', textResponse);
